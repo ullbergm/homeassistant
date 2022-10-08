@@ -1,0 +1,93 @@
+blueprint:
+  name: Person Tracker
+  description: Track a person's home/away/etc status.
+  domain: automation
+  source_url: https://github.com/ullbergm/homeassistant/blueprints/person_tracker.yaml
+  input:
+    person_entity:
+      name: Person
+      selector:
+        entity:
+          domain: person
+
+trigger:
+  platform: state
+  entity_id: !input person_entity
+
+variables:
+  person_entity: !input person_entity
+  person_name: "{{ states[person_entity].name }}"
+
+condition:
+  condition: template
+  # The first case handles leaving the Home zone which has a special state when zoning called 'home'.
+  # The second case handles leaving all other zones.
+  value_template: "{{ zone_entity == 'zone.home' and trigger.from_state.state == 'home' and trigger.to_state.state != 'home' or trigger.from_state.state == zone_state and trigger.to_state.state != zone_state }}"
+
+action:
+  - alias: "Mark {{ person_name }} as extended away"
+    trigger:
+      - platform: state
+        entity_id: input_select.{{ person_name }}_status_dropdown
+        to: 'Away'
+        for:
+          hours: 24
+    action:
+      - service: input_select.select_option
+        data_template:
+          entity_id: input_select.{{ person_name }}_status_dropdown
+          option: Extended Away
+- alias: Mark Phil as just arrived
+  trigger:
+    - platform: state
+      entity_id: device_tracker.phil
+      from: 'not_home'
+      to: 'home'
+  action:
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.phil_status_dropdown
+        option: Just Arrived
+ 
+- alias: Mark Phil as home
+  trigger:
+    - platform: state
+      entity_id: input_select.phil_status_dropdown
+      to: 'Just Arrived'
+      for:
+        minutes: 10
+    - platform: state
+      entity_id: input_select.phil_status_dropdown
+      from: 'Just Left'
+      to: 'Just Arrived'
+  condition:
+  action:
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.phil_status_dropdown
+        option: Home
+ 
+- alias: Mark Phil as just left
+  trigger:
+    - platform: state
+      entity_id: device_tracker.phil
+      from: 'home'
+      to: 'not_home'
+  action:
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.phil_status_dropdown
+        option: Just Left
+ 
+- alias: Mark Phil as away
+  trigger:
+    - platform: state
+      entity_id: input_select.phil_status_dropdown
+      to: 'Just Left'
+      for:
+        minutes: 10
+  action:
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.phil_status_dropdown
+        option: Away
