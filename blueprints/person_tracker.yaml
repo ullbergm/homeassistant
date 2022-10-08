@@ -37,57 +37,58 @@ action:
         data_template:
           entity_id: input_select.{{ person_name }}_status_dropdown
           option: Extended Away
-- alias: Mark Phil as just arrived
-  trigger:
-    - platform: state
-      entity_id: device_tracker.phil
-      from: 'not_home'
-      to: 'home'
-  action:
-    - service: input_select.select_option
-      data:
-        entity_id: input_select.phil_status_dropdown
-        option: Just Arrived
- 
-- alias: Mark Phil as home
-  trigger:
-    - platform: state
-      entity_id: input_select.phil_status_dropdown
-      to: 'Just Arrived'
-      for:
-        minutes: 10
-    - platform: state
-      entity_id: input_select.phil_status_dropdown
-      from: 'Just Left'
-      to: 'Just Arrived'
-  condition:
-  action:
-    - service: input_select.select_option
-      data:
-        entity_id: input_select.phil_status_dropdown
-        option: Home
- 
-- alias: Mark Phil as just left
-  trigger:
-    - platform: state
-      entity_id: device_tracker.phil
-      from: 'home'
-      to: 'not_home'
-  action:
-    - service: input_select.select_option
-      data:
-        entity_id: input_select.phil_status_dropdown
-        option: Just Left
- 
-- alias: Mark Phil as away
-  trigger:
-    - platform: state
-      entity_id: input_select.phil_status_dropdown
-      to: 'Just Left'
-      for:
-        minutes: 10
-  action:
-    - service: input_select.select_option
-      data:
-        entity_id: input_select.phil_status_dropdown
-        option: Away
+  - alias: Mark {{ person_name }} as just arrived
+    trigger:
+      - platform: state
+        entity_id: device_tracker.{{ person_name }}
+        from: 'not_home'
+        to: 'home'
+    action:
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.{{ person_name }}_status_dropdown
+          option: Just Arrived
+   
+  - alias: Mark {{ person_name }} as home
+    trigger:
+      - platform: state
+        entity_id: input_select.{{ person_name }}_status_dropdown
+        to: 'Just Arrived'
+        for:
+          minutes: 10
+      - platform: state
+        entity_id: input_select.{{ person_name }}_status_dropdown
+        from: 'Just Left'
+        to: 'Just Arrived'
+    condition:
+    action:
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.{{ person_name }}_status_dropdown
+          option: Home
+   
+  - alias: Mark {{ person_name }} as just left
+    trigger:
+      - platform: state
+        entity_id: device_tracker.{{ person_name }}
+        from: 'home'
+        to: 'not_home'
+    action:
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.{{ person_name }}_status_dropdown
+          option: Just Left
+   
+  - alias: Mark {{ person_name }} as away
+    trigger:
+      - platform: state
+        entity_id: input_select.{{ person_name }}_status_dropdown
+        to: 'Just Left'
+        for:
+          minutes: 10
+    action:
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.{{ person_name }}_status_dropdown
+          option: Away
+  
